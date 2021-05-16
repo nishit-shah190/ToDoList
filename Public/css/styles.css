@@ -8,9 +8,12 @@ html {
 h1 {
   color: #fff;
   padding: 10px;
+  font-size: 40px;
 }
 h3{
   color: azure;
+  margin-left:auto;
+  font-size: 30px;
 }
 
 .box {
