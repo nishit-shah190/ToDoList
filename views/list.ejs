@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>To Do List</title>
-</head>
-<body>
+     <%- include("header") -%> 
     <div class="box" id="heading">
-        <h1><%=kindOfDay%></h1>
+        <h1><%=listTitle%></h1>
     </div>
     <div class="box">
         <% for(var i =0 ;i<newListItems.length;i++) { %>
@@ -22,12 +13,12 @@
         
         <form action="/" method="POST">
             <input type="text" name="NewList" placeholder="New Item" autocomplete="off">
-            <button type="submit" name="button">+</button>
+            <button class=add type="submit" name="list" value=<%=listTitle%> >+</button>
+        </form>
+        <form action="/work" method="POST">
+            <button class="workbutton" type="submit" name="workbutton">Work List </button>
         </form>
        
     </div>
-    <center>
-   <h3>Have a nice day!</h3>
-</center>
-</body>
-</html>
+    <%-include("footer") -%>
+   
