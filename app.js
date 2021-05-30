@@ -38,8 +38,7 @@ app.get("/work", function(req,res)
 
 app.post("/work" , function(req,res)
 {
-    let item = req.body.NewList;
-    workitems.push(item);
+    
     res.redirect("/work");
 });
 app.get("/about", function(req,res)
