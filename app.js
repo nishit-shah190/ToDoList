@@ -24,7 +24,12 @@ const Series = new Item ({
 });
 
 const defaultItems = [BuyFood , Exercise , Series];
+const ListSchema = {
+    name:String,
+    item: [itemsSchema]
+}
 
+const List = mongoose.model("List" , ListSchema);
 app.get("/", function(req, res){
    let day = date.getdate();
    Item.find({}, function(err,foundItems)
@@ -45,7 +50,7 @@ app.get("/", function(req, res){
        }
        else
        {
-        res.render("list" , {listTitle:day , newListItems:foundItems});
+        res.render("list" , {listTitle:"Today" , newListItems:foundItems});
        }
     
    });
@@ -55,21 +60,31 @@ app.get("/", function(req, res){
 app.post("/", function(req, res)
 {
     let Newitem = req.body.NewList;
+    const ListName = req.body.list;
+    let day = date.getdate();
+    console.log(day , ListName );
+    const item = new Item ({
+        name:Newitem
+    });
     console.log(req.body.list);
 
-    if(req.body.list === "Work")
+    if(req.body.list === "Today")
     {
-        workitems.push(item);
-        res.redirect("/work");
+        item.save();
+        res.redirect("/");
     }
     else
     {
-        const item = new Item ({
-            name:Newitem
+        List.findOne({name: ListName } , function(err, foundList)
+        {
+              foundList.item.push(item);
+              foundList.save();
+              res.redirect("/" + ListName);
         });
+        
         item.save();
             
-        res.redirect("/");
+        
     }
     
 
@@ -91,10 +106,32 @@ app.post("/delete", function(req,res)
             console.log("Deletion failed");
         }
     })
-})
-app.get("/work", function(req,res)
+});
+app.get("/:customListItem" , function(req,res)
 {
-    res.render("list", {listTitle:"Work List", newListItems:workitems,});
+    const customListItems= req.params.customListItem;
+
+    List.findOne({name: customListItems} , function(err, foundList)
+    {
+        if(!err)
+        {
+            if(!foundList)
+            {
+                 const list = new List({
+                    name:customListItems,
+                    item: defaultItems
+                });
+                list.save();
+                res.redirect("/" + customListItems);
+            }
+            else
+            {
+                res.render("list" , {listTitle:customListItems , newListItems:foundList.item});
+            }
+        }
+    })
+   
+    
 });
 
 app.post("/work" , function(req,res)
