@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 const date = require(__dirname + "/date.js");
 const app = express();
 app.set('view engine','ejs');
@@ -32,6 +33,7 @@ const ListSchema = {
 const List = mongoose.model("List" , ListSchema);
 app.get("/", function(req, res){
    let day = date.getdate();
+   
    Item.find({}, function(err,foundItems)
    {
        if(foundItems.length===0)
@@ -50,7 +52,7 @@ app.get("/", function(req, res){
        }
        else
        {
-        res.render("list" , {listTitle:"Today" , newListItems:foundItems});
+        res.render("list" , {listTitle:"Today" ,date:day, newListItems:foundItems});
        }
     
    });
@@ -62,6 +64,7 @@ app.post("/", function(req, res)
     let Newitem = req.body.NewList;
     const ListName = req.body.list;
     let day = date.getdate();
+   
     console.log(day , ListName );
     const item = new Item ({
         name:Newitem
@@ -94,22 +97,39 @@ app.post("/", function(req, res)
 app.post("/delete", function(req,res)
 {
     const checkedID = (req.body.checkedbox);
-    Item.findByIdAndRemove(checkedID, function(err)
+    const listName = req.body.ListName;
+
+    if(listName === "Today")
     {
-        if(!err)
+        Item.findByIdAndRemove(checkedID, function(err)
         {
-            console.log("Successfully deleted");
-            res.redirect("/");
-        }
-        else
+            if(!err)
+            {
+                console.log("Successfully deleted");
+                res.redirect("/");
+            }
+            else
+            {
+                console.log("Deletion failed");
+            }
+        })
+    }
+    else
+    {
+        List.findOneAndUpdate({name:listName} , {$pull: {item :{_id:checkedID}}} , function(err, foundList)
         {
-            console.log("Deletion failed");
-        }
-    })
+            if(!err)
+            {
+                res.redirect("/" + listName);
+            }
+        })
+    }
+  
 });
 app.get("/:customListItem" , function(req,res)
 {
-    const customListItems= req.params.customListItem;
+    const customListItems= _.capitalize(req.params.customListItem);
+    let day = date.getdate();
 
     List.findOne({name: customListItems} , function(err, foundList)
     {
@@ -126,7 +146,7 @@ app.get("/:customListItem" , function(req,res)
             }
             else
             {
-                res.render("list" , {listTitle:customListItems , newListItems:foundList.item});
+                res.render("list" , {listTitle:customListItems , date:day, newListItems:foundList.item});
             }
         }
     })
